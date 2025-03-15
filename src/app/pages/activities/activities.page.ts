@@ -1,12 +1,11 @@
 // src/app/pages/activities/activities.page.ts
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ToastController, NavController } from '@ionic/angular';
+import { Component } from '@angular/core';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ToastController, NavController, IonicModule} from '@ionic/angular';
 import { DataService } from '../../services/data.service';
 import { Activity } from '../../models/activity';
-import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {error} from "@angular/compiler-cli/src/transformers/util";
 
 @Component({
   selector: 'app-activities',
@@ -20,7 +19,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule
   ]
 })
-export class ActivitiesPage implements OnInit {
+export class ActivitiesPage  {
   activityForm: FormGroup;
   activityTypes = [
     { value: 'run', label: 'Running', icon: 'walk-outline' },
@@ -47,8 +46,6 @@ export class ActivitiesPage implements OnInit {
     });
   }
 
-  ngOnInit() {}
-
   async saveActivity() {
     if (this.activityForm.valid) {
       const activity: Activity = {
@@ -56,25 +53,23 @@ export class ActivitiesPage implements OnInit {
         icon: this.getIconForActivityType(this.activityForm.value.type)
       };
 
-      this.dataService.addActivity(activity).subscribe({
-        next: async () => {
-          const toast = await this.toastController.create({
-            message: 'Activity saved successfully!',
-            duration: 2000,
-            color: 'success'
-          });
-          toast.present();
-          this.navController.navigateBack('/dashboard');
-        },
-        error: async (error) => {
-          const toast = await this.toastController.create({
-            message: 'Error saving activity: ' + error,
-            duration: 3000,
-            color: 'danger'
-          });
-          toast.present();
-        }
-      });
+      try {
+        await this.dataService.addActivity(activity);
+        const toast = await this.toastController.create({
+          message: 'Activity saved successfully!',
+          duration: 2000,
+          color: 'success'
+        });
+        toast.present();
+        this.navController.navigateBack('/dashboard');
+      } catch (error) {
+        const toast = await this.toastController.create({
+          message: 'Error saving activity: ' + error,
+          duration: 3000,
+          color: 'danger'
+        });
+        toast.present();
+      }
     }
   }
 
@@ -82,4 +77,6 @@ export class ActivitiesPage implements OnInit {
     const activityType = this.activityTypes.find(a => a.value === type);
     return activityType ? activityType.icon : 'fitness-outline';
   }
+
+
 }

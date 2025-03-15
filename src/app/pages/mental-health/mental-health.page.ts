@@ -1,5 +1,5 @@
 // src/app/pages/mental-health/mental-health.page.ts
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastController, NavController } from '@ionic/angular';
 import { DataService } from '../../services/data.service';
@@ -20,7 +20,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule
   ]
 })
-export class MentalHealthPage implements OnInit {
+export class MentalHealthPage  {
   checkInForm: FormGroup;
 
   constructor(
@@ -38,13 +38,11 @@ export class MentalHealthPage implements OnInit {
     });
   }
 
-  ngOnInit() {}
-
   async saveCheckIn() {
     if (this.checkInForm.valid) {
       const checkIn: MentalCheckIn = this.checkInForm.value;
 
-      this.dataService.addMentalCheckIn(checkIn).subscribe({
+      (await this.dataService.addMentalCheckIn(checkIn)).subscribe({
         next: async () => {
           const toast = await this.toastController.create({
             message: 'Mental check-in saved successfully!',

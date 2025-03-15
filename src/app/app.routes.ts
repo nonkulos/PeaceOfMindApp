@@ -2,7 +2,7 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: '',
     redirectTo: 'dashboard',
@@ -10,11 +10,11 @@ const routes: Routes = [
   },
   {
     path: 'dashboard',
-    loadChildren: () => import('../pages/dashboard/dashboard.page').then(m => m.DashboardPageModule)
+    loadChildren: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage)
   },
   {
     path: 'activities',
-    loadChildren: () => import('./pages/activities/activities.page').then(m => m.ActivitiesPageModule)
+    loadChildren: () => import('./pages/activities/activities.page').then(m => m.ActivitiesPage)
   },
   {
     path: 'mental-health',
@@ -22,7 +22,7 @@ const routes: Routes = [
   },
   {
     path: 'profile',
-    loadChildren: () => import('./pages/profile/profile.page').then(m => m.ProfilePageModule)
+    loadChildren: () => import('./pages/profile/profile.page').then(m => m.ProfilePage)
   },
   {
     path: 'nutrition',

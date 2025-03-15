@@ -82,8 +82,8 @@ export class NutritionPage implements OnInit {
             duration: 2000,
             color: 'success'
           });
-          toast.present();
-          this.navController.navigateBack('/dashboard');
+          await toast.present();
+          await this.navController.navigateBack('/dashboard');
         },
         error: async (error) => {
           const toast = await this.toastController.create({
@@ -91,7 +91,7 @@ export class NutritionPage implements OnInit {
             duration: 3000,
             color: 'danger'
           });
-          toast.present();
+          await toast.present();
         }
       });
     }

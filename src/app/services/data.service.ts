@@ -1,11 +1,12 @@
 // src/app/services/data.service.ts
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
-import {BehaviorSubject, delay, Observable, of} from 'rxjs';
+import { BehaviorSubject, delay, Observable, of } from 'rxjs';
 import { Activity } from '../models/activity';
 import { MentalCheckIn } from '../models/mental-check-in';
+import { NutritionEntry } from "../models/nutrition-entry";
+import { UserProfile } from "../models/user-profile";
 import { v4 as uuidv4 } from 'uuid';
-import {NutritionEntry} from "../models/nutrition-entry";
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,7 @@ import {NutritionEntry} from "../models/nutrition-entry";
 export class DataService {
   private activitiesSubject = new BehaviorSubject<Activity[]>([]);
   private mentalCheckInsSubject = new BehaviorSubject<MentalCheckIn[]>([]);
+  private userProfileSubject = new BehaviorSubject<UserProfile | null>(null);
   private storageReady = false;
 
   constructor(private storage: Storage) {
@@ -24,6 +26,7 @@ export class DataService {
     this.storageReady = true;
     await this.loadActivities();
     await this.loadMentalCheckIns();
+    await this.loadUserProfile();
   }
 
   // Activities
@@ -68,14 +71,60 @@ export class DataService {
     const checkIns = [...this.mentalCheckInsSubject.value, newCheckIn];
     await this.storage.set('mentalCheckIns', checkIns);
     this.mentalCheckInsSubject.next(checkIns);
+    return of({ success: true }).pipe(delay(300));
   }
 
-  // Update src/app/services/data.service.ts to include this method
-  async addNutritionEntry(entry: NutritionEntry): Promise<Observable<any>> {
-    // If using a mock service for now
+  // Nutrition Entries
+  addNutritionEntry(entry: NutritionEntry): Observable<any> {
+    // Mock implementation
     return of({ success: true }).pipe(delay(500));
+  }
 
-    // If using HTTP client to a backend
-    // return this.http.post<any>(`${this.apiUrl}/nutrition`, entry);
+  // User Profile
+  async loadUserProfile() {
+    if (!this.storageReady) await this.initStorage();
+    const profile = await this.storage.get('userProfile');
+    this.userProfileSubject.next(profile);
+  }
+
+  getUserProfile(): Observable<UserProfile> {
+    // If stored profile exists, return it
+    if (this.userProfileSubject.value) {
+      return of(this.userProfileSubject.value).pipe(delay(300));
+    }
+
+    // Otherwise return mock data
+    const mockProfile: UserProfile = {
+      firstName: 'John',
+      lastName: 'Doe',
+      birthDate: '1990-01-01',
+      gender: 'male',
+      sport: 'Basketball',
+      team: 'Team A',
+      height: 180,
+      weight: 75,
+      email: 'john.doe@example.com',
+      phone: '1234567890',
+      emergencyContact: 'Jane Doe',
+      emergencyPhone: '0987654321',
+      medicalNotes: 'None',
+      goals: 'Stay fit and improve performance',
+      profileImage: 'assets/default-avatar.png'
+    };
+
+    return of(mockProfile).pipe(delay(500));
+  }
+
+  updateUserProfile(profile: UserProfile): Observable<any> {
+    (async () => {
+      await this.storage.set('userProfile', profile);
+      this.userProfileSubject.next(profile);
+    })();
+    return of({ success: true }).pipe(delay(500));
+  }
+
+  logout(): Observable<any> {
+    // Clear user data or authentication tokens as needed
+    return of({ success: true }).pipe(delay(300));
   }
 }

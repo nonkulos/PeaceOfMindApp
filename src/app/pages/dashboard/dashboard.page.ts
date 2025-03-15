@@ -6,7 +6,6 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Activity } from '../../models/activity';
 import { MentalCheckIn } from '../../models/mental-check-in';
-import { NutritionEntry } from '../../models/nutrition-entry';
 import { Observable } from 'rxjs';
 
 @Component({
