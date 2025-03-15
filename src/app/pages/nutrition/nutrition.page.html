@@ -1,0 +1,96 @@
+<!-- src/app/pages/nutrition/nutrition.page.html -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Nutrition Tracking</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="nutritionForm" (ngSubmit)="saveNutritionEntry()">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-subtitle>Track your nutrition</ion-card-subtitle>
+        <ion-card-title>Meal & Hydration Log</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="floating">Entry Type</ion-label>
+          <ion-select formControlName="mealType" interface="popover">
+            <ion-select-option *ngFor="let type of mealTypes" [value]="type.value">
+              <ion-icon [name]="type.icon"></ion-icon> {{ type.label }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Title</ion-label>
+          <ion-input formControlName="title" type="text" placeholder="e.g., Oatmeal with Berries"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Date & Time</ion-label>
+          <ion-datetime-button datetime="mealTime"></ion-datetime-button>
+          <ion-modal [keepContentsMounted]="true">
+            <ng-template>
+              <ion-datetime
+                id="mealTime"
+                formControlName="date"
+              ></ion-datetime>
+            </ng-template>
+          </ion-modal>
+        </ion-item>
+
+        <div [hidden]="isHydration()">
+          <ion-item>
+            <ion-label position="floating">Calories</ion-label>
+            <ion-input formControlName="calories" type="number" min="0" placeholder="400"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="floating">Protein (g)</ion-label>
+            <ion-input formControlName="protein" type="number" min="0" placeholder="20"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="floating">Carbs (g)</ion-label>
+            <ion-input formControlName="carbs" type="number" min="0" placeholder="50"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="floating">Fats (g)</ion-label>
+            <ion-input formControlName="fats" type="number" min="0" placeholder="10"></ion-input>
+          </ion-item>
+        </div>
+
+        <ion-item>
+          <ion-label position="floating">Water (ml)</ion-label>
+          <ion-input formControlName="water" type="number" min="0" [placeholder]="isHydration() ? '500' : '0'"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Notes</ion-label>
+          <ion-textarea
+            formControlName="notes"
+            rows="3"
+            placeholder="Any details about this meal or hydration"
+          ></ion-textarea>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="ion-padding">
+      <ion-button
+        expand="block"
+        type="submit"
+        [disabled]="!nutritionForm.valid"
+      >
+        <ion-icon name="save-outline" slot="start"></ion-icon>
+        Save Entry
+      </ion-button>
+    </div>
+  </form>
+</ion-content>
