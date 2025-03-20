@@ -9,7 +9,7 @@ const Tab = createBottomTabNavigator();
 
 const AppNavigator = () => {
   return (
-      <Tab.Navigator>
+      <Tab.Navigator >
         <Tab.Screen name="Journal" component={JournalScreen} />
         <Tab.Screen name="Activities" component={ActivitiesScreen} />
         <Tab.Screen name="Check-In" component={CheckInScreen} />
