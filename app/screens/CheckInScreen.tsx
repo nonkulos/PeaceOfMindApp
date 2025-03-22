@@ -15,7 +15,7 @@ const CheckInScreen = () => {
 
   useEffect(() => {
     loadFile({enums: ScreenNames.CheckIn}).then(r => {
-        setPrevCheckIns(r);
+      setPrevCheckIns(r);
     });
   }, []);
 
@@ -74,9 +74,12 @@ const CheckInScreen = () => {
                     <View style={styles.buttonContainer}>
                       <TouchableOpacity
                           style={[styles.actionButton, styles.saveButton]}
-                          onPress={() => setShowCheckIn(false)}
+                          onPress={() => {
+                            saveToFile(ScreenNames.CheckIn);
+                            setShowCheckIn(false);
+                          }}
                       >
-                        <Text style={styles.buttonText} onPress={() => saveToFile(ScreenNames.CheckIn)}>Save</Text>
+                        <Text style={styles.buttonText}>Save</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                           style={[styles.actionButton, styles.cancelButton]}
@@ -105,7 +108,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
-    height: '100%;',
+    height: '100%',
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 24,

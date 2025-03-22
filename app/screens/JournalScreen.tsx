@@ -14,7 +14,7 @@ const JournalScreen = () => {
 
   useEffect(() => {
     loadFile({enums: ScreenNames.Journal}).then(r => {
-        setPrevJournals(r);
+      setPrevJournals(r);
     });
   }, []);
 
@@ -60,9 +60,12 @@ const JournalScreen = () => {
                     <View style={styles.buttonContainer}>
                       <TouchableOpacity
                           style={[styles.actionButton, styles.saveButton]}
-                          onPress={() => setJournal(false)}
+                          onPress={() => {
+                            saveToFile(ScreenNames.Journal);
+                            setJournal(false);
+                          }}
                       >
-                        <Text style={styles.buttonText} onPress={() => saveToFile(ScreenNames.Journal)}>Save</Text>
+                        <Text style={styles.buttonText}>Save</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                           style={[styles.actionButton, styles.cancelButton]}
@@ -91,7 +94,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
-    height: '100%;',
+    height: '100%',
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 24,

@@ -16,7 +16,7 @@ const ActivitiesScreen = () => {
   useEffect(() => {
     loadFile({enums: ScreenNames.Activities}).then(r => {
         setPrevActivities(r);
-    }
+    });
   }, []);
 
   return (
