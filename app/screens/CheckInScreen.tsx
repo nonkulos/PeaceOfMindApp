@@ -4,6 +4,8 @@ import {
   ScrollView, SafeAreaView, StatusBar, KeyboardAvoidingView, Platform
 } from 'react-native';
 import Slider from '@react-native-community/slider';
+import {saveToFile} from "@/app/file-save/save";
+import {CheckIn} from "@/constants/Enums";
 
 const CheckInScreen = () => {
   const [showCheckIn, setShowCheckIn] = useState(false);
@@ -66,7 +68,7 @@ const CheckInScreen = () => {
                           style={[styles.actionButton, styles.saveButton]}
                           onPress={() => setShowCheckIn(false)}
                       >
-                        <Text style={styles.buttonText}>Save</Text>
+                        <Text style={styles.buttonText} onPress={() => saveToFile(CheckIn)}>Save</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                           style={[styles.actionButton, styles.cancelButton]}

@@ -3,6 +3,8 @@ import {
   View, Text, TextInput, StyleSheet, TouchableOpacity,
   ScrollView, SafeAreaView, KeyboardAvoidingView, Platform
 } from 'react-native';
+import {saveToFile} from "@/app/file-save/save";
+import {Activities} from "@/constants/Enums";
 
 const ActivitiesScreen = () => {
   const [activity, setActivity] = useState(false);
@@ -56,7 +58,7 @@ const ActivitiesScreen = () => {
                           style={[styles.actionButton, styles.saveButton]}
                           onPress={() => setActivity(false)}
                       >
-                        <Text style={styles.buttonText}>Save</Text>
+                        <Text style={styles.buttonText} onPress={() => saveToFile(Activities)}>Save</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                           style={[styles.actionButton, styles.cancelButton]}
@@ -85,7 +87,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
-    height: '100%;',
+    height: '100%',
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 24,

@@ -3,6 +3,8 @@ import {
   View, Text, TextInput, StyleSheet, TouchableOpacity,
   ScrollView, SafeAreaView, KeyboardAvoidingView, Platform
 } from 'react-native';
+import {saveToFile} from "@/app/file-save/save";
+import {Journal} from "@/constants/Enums";
 
 const JournalScreen = () => {
   const [journal, setJournal] = useState(false);
@@ -52,7 +54,7 @@ const JournalScreen = () => {
                           style={[styles.actionButton, styles.saveButton]}
                           onPress={() => setJournal(false)}
                       >
-                        <Text style={styles.buttonText}>Save</Text>
+                        <Text style={styles.buttonText} onPress={() => saveToFile(Journal)}>Save</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                           style={[styles.actionButton, styles.cancelButton]}
