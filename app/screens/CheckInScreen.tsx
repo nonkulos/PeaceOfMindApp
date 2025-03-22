@@ -1,15 +1,23 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   ScrollView, SafeAreaView, StatusBar, KeyboardAvoidingView, Platform
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import {saveToFile} from "@/app/file-save/save";
-import {CheckIn} from "@/constants/Enums";
+import {ScreenNames} from "@/constants/Enums";
+import {loadFile} from "@/app/file-save/load";
 
 const CheckInScreen = () => {
   const [showCheckIn, setShowCheckIn] = useState(false);
   const [moodValue, setMoodValue] = useState(5);
+  const [prevCheckIns, setPrevCheckIns] = useState([]);
+
+  useEffect(() => {
+    loadFile({enums: ScreenNames.CheckIn}).then(r => {
+        setPrevCheckIns(r);
+    });
+  }, []);
 
   return (
       <SafeAreaView style={styles.safeArea}>
@@ -68,7 +76,7 @@ const CheckInScreen = () => {
                           style={[styles.actionButton, styles.saveButton]}
                           onPress={() => setShowCheckIn(false)}
                       >
-                        <Text style={styles.buttonText} onPress={() => saveToFile(CheckIn)}>Save</Text>
+                        <Text style={styles.buttonText} onPress={() => saveToFile(ScreenNames.CheckIn)}>Save</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                           style={[styles.actionButton, styles.cancelButton]}

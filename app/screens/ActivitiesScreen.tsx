@@ -1,15 +1,23 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View, Text, TextInput, StyleSheet, TouchableOpacity,
   ScrollView, SafeAreaView, KeyboardAvoidingView, Platform
 } from 'react-native';
 import {saveToFile} from "@/app/file-save/save";
-import {Activities} from "@/constants/Enums";
+import {ScreenNames} from "@/constants/Enums";
+import {loadFile} from "@/app/file-save/load";
 
 const ActivitiesScreen = () => {
   const [activity, setActivity] = useState(false);
   const [activityName, setActivityName] = useState('');
   const [activityDuration, setActivityDuration] = useState('');
+  const [prevActivities, setPrevActivities] = useState([]);
+
+  useEffect(() => {
+    loadFile({enums: ScreenNames.Activities}).then(r => {
+        setPrevActivities(r);
+    }
+  }, []);
 
   return (
       <SafeAreaView style={styles.safeArea}>
@@ -58,7 +66,7 @@ const ActivitiesScreen = () => {
                           style={[styles.actionButton, styles.saveButton]}
                           onPress={() => setActivity(false)}
                       >
-                        <Text style={styles.buttonText} onPress={() => saveToFile(Activities)}>Save</Text>
+                        <Text style={styles.buttonText} onPress={() => saveToFile(ScreenNames.Activities)}>Save</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                           style={[styles.actionButton, styles.cancelButton]}

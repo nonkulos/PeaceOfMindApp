@@ -1,22 +1,23 @@
 import * as FileSystem from 'expo-file-system';
-import {Activities, CheckIn, Journal} from "@/constants/Enums";
+import {ScreenNames, ScreenPaths} from "@/constants/Enums";
 
 export async function saveToFile({ enums }: any) {
-    let path: string = "";
+    let path: string;
 
     switch (enums) {
-        case CheckIn:
-            path = FileSystem.documentDirectory + "/files/saveCheckIn.json";
+        case ScreenNames.Activities:
+            path = ScreenPaths[ScreenNames.Activities]
             break;
-        case Journal:
-            path = FileSystem.documentDirectory + "/files/journal.json";
+        case ScreenNames.Journal:
+            path = ScreenPaths[ScreenNames.Journal]
             break;
-        case Activities:
-            path = FileSystem.documentDirectory + "/files/checkIn.json";
+        case ScreenNames.CheckIn:
+            path = ScreenPaths[ScreenNames.CheckIn]
             break;
         default:
             path = FileSystem.documentDirectory + "/files/files.json";
     }
+
 
     try {
         await FileSystem.writeAsStringAsync(path, "main");

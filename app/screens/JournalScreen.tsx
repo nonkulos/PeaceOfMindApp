@@ -1,14 +1,22 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View, Text, TextInput, StyleSheet, TouchableOpacity,
   ScrollView, SafeAreaView, KeyboardAvoidingView, Platform
 } from 'react-native';
 import {saveToFile} from "@/app/file-save/save";
-import {Journal} from "@/constants/Enums";
+import {ScreenNames} from "@/constants/Enums";
+import {loadFile} from "@/app/file-save/load";
 
 const JournalScreen = () => {
   const [journal, setJournal] = useState(false);
   const [journalText, setJournalText] = useState('');
+  const [prevJournals, setPrevJournals] = useState([]);
+
+  useEffect(() => {
+    loadFile({enums: ScreenNames.Journal}).then(r => {
+        setPrevJournals(r);
+    });
+  }, []);
 
   return (
       <SafeAreaView style={styles.safeArea}>
@@ -54,7 +62,7 @@ const JournalScreen = () => {
                           style={[styles.actionButton, styles.saveButton]}
                           onPress={() => setJournal(false)}
                       >
-                        <Text style={styles.buttonText} onPress={() => saveToFile(Journal)}>Save</Text>
+                        <Text style={styles.buttonText} onPress={() => saveToFile(ScreenNames.Journal)}>Save</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                           style={[styles.actionButton, styles.cancelButton]}
