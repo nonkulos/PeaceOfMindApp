@@ -66,21 +66,18 @@ export async function saveToFile(screenType: ScreenNames, data: any): Promise<bo
  */
 export async function deleteFromFile(screenType: ScreenNames, id: number): Promise<boolean> {
     try {
+        console.log(`[DELETE] Starting deletion for ID: ${id} in ${screenType}`);
         // Load existing entries
         const existingData = await loadFile(screenType) || [];
-
-        // Debugging - logging the entries before deletion
-        console.log(`Found ${existingData.length} entries before deletion`);
+        console.log(`[DELETE] Loaded ${existingData.length} entries`);
 
         // Filter out the entry with the specified id
         const updatedData = existingData.filter(entry => entry.id !== id);
-
-        // Debugging - logging the result
-        console.log(`Found ${updatedData.length} entries after filtering, id: ${id}`);
+        console.log(`[DELETE] After filtering: ${updatedData.length} entries`);
 
         // If no entry was removed, return false
         if (updatedData.length === existingData.length) {
-            console.warn("No entry found with id:", id);
+            console.warn(`[DELETE] No entry found with id: ${id}`);
             return false;
         }
 
@@ -110,7 +107,6 @@ export async function deleteFromFile(screenType: ScreenNames, id: number): Promi
                     path,
                     JSON.stringify(updatedData)
                 );
-                console.log("Successfully deleted entry");
                 return true;
             } catch (e) {
                 console.error("Delete error:", e);
@@ -122,7 +118,6 @@ export async function deleteFromFile(screenType: ScreenNames, id: number): Promi
         return false;
     }
 }
-
 function getFilePath(screenType: ScreenNames): string {
     switch (screenType) {
         case ScreenNames.Activities:
