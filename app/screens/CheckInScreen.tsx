@@ -4,7 +4,7 @@ import {
   ScrollView, SafeAreaView, StatusBar, KeyboardAvoidingView, Platform, Alert
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { saveToFile } from "@/app/file-save/save";
+import {deleteFromFile, saveToFile} from "@/app/file-save/save";
 import { ScreenNames } from "@/constants/Enums";
 import { loadFile } from "@/app/file-save/load";
 import * as FileSystem from 'expo-file-system';
@@ -120,29 +120,9 @@ const CheckInScreen = () => {
             text: "Delete",
             style: "destructive",
             onPress: async () => {
-              // Filter out the entry
-              const updatedEntries = prevCheckIns.filter(entry => entry.id !== id);
-
-              // Save back to storage
-              if (Platform.OS === 'web') {
-                try {
-                  const storageKey = getWebStorageKey(ScreenNames.CheckIn);
-                  localStorage.setItem(storageKey, JSON.stringify(updatedEntries));
-                  setPrevCheckIns(updatedEntries);
-                } catch (e) {
-                  console.error("Web delete error:", e);
-                }
-              } else {
-                try {
-                  const path = getFilePath(ScreenNames.CheckIn);
-                  await FileSystem.writeAsStringAsync(
-                      path,
-                      JSON.stringify(updatedEntries)
-                  );
-                  setPrevCheckIns(updatedEntries);
-                } catch (e) {
-                  console.error("Delete error:", e);
-                }
+              const success = await deleteFromFile(ScreenNames.CheckIn, id);
+              if (success) {
+                await loadEntries();
               }
             }
           }
