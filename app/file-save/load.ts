@@ -1,32 +1,60 @@
 import * as FileSystem from 'expo-file-system';
-import {ScreenNames, ScreenPaths} from "@/constants/Enums";
+import { Platform } from 'react-native';
+import { ScreenNames } from "@/constants/Enums";
 
-
-export async function loadFile({ enums }: any ): Promise<object | any> {
-    let path: string;
-
-    switch (enums) {
-        case ScreenNames.Activities:
-            path = ScreenPaths[ScreenNames.Activities]
-            break;
-        case ScreenNames.Journal:
-            path = ScreenPaths[ScreenNames.Journal]
-            break;
-        case ScreenNames.CheckIn:
-            path = ScreenPaths[ScreenNames.CheckIn]
-            break;
-        default:
-            path = FileSystem.documentDirectory + "/files/files.json";
+export async function loadFile(screenType: ScreenNames): Promise<any[]> {
+    // Handle web platform with localStorage
+    if (Platform.OS === 'web') {
+        try {
+            const storageKey = getWebStorageKey(screenType);
+            const data = localStorage.getItem(storageKey);
+            return data ? JSON.parse(data) : [];
+        } catch (e) {
+            console.error("Web load error:", e);
+            return [];
+        }
     }
 
+    // Mobile implementation
+    let path: string = getFilePath(screenType);
+
     try {
-        const response = await fetch(path);
-        const json = await response.json();
+        const fileInfo = await FileSystem.getInfoAsync(path);
 
-        console.log(json);
+        if (!fileInfo.exists) {
+            return [];
+        }
 
-        return json;
+        const fileContent = await FileSystem.readAsStringAsync(path);
+        return JSON.parse(fileContent);
     } catch (e: unknown) {
-        console.error(e as string);
+        console.error("Load error:", e);
+        return [];
+    }
+}
+
+function getFilePath(screenType: ScreenNames): string {
+    switch (screenType) {
+        case ScreenNames.Activities:
+            return FileSystem.documentDirectory + "files/activities.json";
+        case ScreenNames.Journal:
+            return FileSystem.documentDirectory + "files/journal.json";
+        case ScreenNames.CheckIn:
+            return FileSystem.documentDirectory + "files/checkin.json";
+        default:
+            return FileSystem.documentDirectory + "files/files.json";
+    }
+}
+
+function getWebStorageKey(screenType: ScreenNames): string {
+    switch (screenType) {
+        case ScreenNames.Activities:
+            return "peace_of_mind_activities";
+        case ScreenNames.Journal:
+            return "peace_of_mind_journal";
+        case ScreenNames.CheckIn:
+            return "peace_of_mind_checkin";
+        default:
+            return "peace_of_mind_data";
     }
 }

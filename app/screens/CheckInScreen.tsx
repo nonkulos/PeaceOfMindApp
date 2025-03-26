@@ -1,23 +1,241 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  ScrollView, SafeAreaView, StatusBar, KeyboardAvoidingView, Platform
+  ScrollView, SafeAreaView, StatusBar, KeyboardAvoidingView, Platform, Alert
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import {saveToFile} from "@/app/file-save/save";
-import {ScreenNames} from "@/constants/Enums";
-import {loadFile} from "@/app/file-save/load";
+import { saveToFile } from "@/app/file-save/save";
+import { ScreenNames } from "@/constants/Enums";
+import { loadFile } from "@/app/file-save/load";
+import * as FileSystem from 'expo-file-system';
+
+// Define the CheckIn entry type
+interface CheckInEntry {
+  id: number;
+  date: string;
+  mood: number;
+}
 
 const CheckInScreen = () => {
   const [showCheckIn, setShowCheckIn] = useState(false);
   const [moodValue, setMoodValue] = useState(5);
-  const [prevCheckIns, setPrevCheckIns] = useState([]);
+  const [prevCheckIns, setPrevCheckIns] = useState<CheckInEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingEntry, setEditingEntry] = useState<CheckInEntry | null>(null);
 
   useEffect(() => {
-    loadFile({enums: ScreenNames.CheckIn}).then(r => {
-      setPrevCheckIns(r);
-    });
+    loadEntries();
   }, []);
+
+  const loadEntries = async () => {
+    setLoading(true);
+    const entries = await loadFile(ScreenNames.CheckIn);
+    setPrevCheckIns(entries || []);
+    setLoading(false);
+  };
+
+  const handleSave = async () => {
+    if (editingEntry) {
+      await updateEntry();
+    } else {
+      const success = await saveToFile(ScreenNames.CheckIn, {
+        mood: moodValue
+      });
+
+      if (success) {
+        setShowCheckIn(false);
+        loadEntries();
+      }
+    }
+  };
+
+  const startEditing = (entry: CheckInEntry) => {
+    setEditingEntry(entry);
+    setMoodValue(entry.mood);
+    setShowCheckIn(true);
+  };
+
+  const cancelEditing = () => {
+    setEditingEntry(null);
+    setMoodValue(5);
+    setShowCheckIn(false);
+  };
+
+  const updateEntry = async () => {
+    if (!editingEntry) return;
+
+    // Get current entries
+    const currentEntries = [...prevCheckIns];
+
+    // Find and update the entry
+    const updatedEntries = currentEntries.map(entry =>
+        entry.id === editingEntry.id
+            ? { ...entry, mood: moodValue }
+            : entry
+    );
+
+    // Save back to storage
+    if (Platform.OS === 'web') {
+      try {
+        const storageKey = getWebStorageKey(ScreenNames.CheckIn);
+        localStorage.setItem(storageKey, JSON.stringify(updatedEntries));
+        setPrevCheckIns(updatedEntries);
+        setEditingEntry(null);
+        setMoodValue(5);
+        setShowCheckIn(false);
+        return true;
+      } catch (e) {
+        console.error("Web update error:", e);
+        return false;
+      }
+    } else {
+      try {
+        const path = getFilePath(ScreenNames.CheckIn);
+        await FileSystem.writeAsStringAsync(
+            path,
+            JSON.stringify(updatedEntries)
+        );
+        setPrevCheckIns(updatedEntries);
+        setEditingEntry(null);
+        setMoodValue(5);
+        setShowCheckIn(false);
+        return true;
+      } catch (e) {
+        console.error("Update error:", e);
+        return false;
+      }
+    }
+  };
+
+  const deleteEntry = async (id: number) => {
+    Alert.alert(
+        "Delete Check-In",
+        "Are you sure you want to delete this check-in entry?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: async () => {
+              // Filter out the entry
+              const updatedEntries = prevCheckIns.filter(entry => entry.id !== id);
+
+              // Save back to storage
+              if (Platform.OS === 'web') {
+                try {
+                  const storageKey = getWebStorageKey(ScreenNames.CheckIn);
+                  localStorage.setItem(storageKey, JSON.stringify(updatedEntries));
+                  setPrevCheckIns(updatedEntries);
+                } catch (e) {
+                  console.error("Web delete error:", e);
+                }
+              } else {
+                try {
+                  const path = getFilePath(ScreenNames.CheckIn);
+                  await FileSystem.writeAsStringAsync(
+                      path,
+                      JSON.stringify(updatedEntries)
+                  );
+                  setPrevCheckIns(updatedEntries);
+                } catch (e) {
+                  console.error("Delete error:", e);
+                }
+              }
+            }
+          }
+        ]
+    );
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getMoodEmoji = (mood: number) => {
+    if (mood >= 9) return '😁';
+    if (mood >= 7) return '😊';
+    if (mood >= 5) return '😐';
+    if (mood >= 3) return '😕';
+    return '😢';
+  };
+
+  const renderPreviousEntries = () => {
+    if (loading) {
+      return <Text style={styles.emptyStateText}>Loading...</Text>;
+    }
+
+    if (prevCheckIns.length === 0) {
+      return (
+          <View style={styles.emptyStateContainer}>
+            <Text style={styles.emptyStateText}>
+              Track your mood throughout the day to monitor your mental well-being
+            </Text>
+            <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => {
+                  setEditingEntry(null);
+                  setMoodValue(5);
+                  setShowCheckIn(true);
+                }}
+            >
+              <Text style={styles.buttonText}>Check In Now</Text>
+            </TouchableOpacity>
+          </View>
+      );
+    }
+
+    return (
+        <View style={styles.entriesContainer}>
+          <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => {
+                setEditingEntry(null);
+                setMoodValue(5);
+                setShowCheckIn(true);
+              }}
+          >
+            <Text style={styles.buttonText}>New Check-In</Text>
+          </TouchableOpacity>
+
+          <ScrollView style={styles.entriesList}>
+            {prevCheckIns.map((entry) => (
+                <View key={entry.id} style={styles.entryCard}>
+                  <Text style={styles.entryDate}>{formatDate(entry.date)}</Text>
+                  <View style={styles.moodContainer}>
+                    <Text style={styles.moodEmoji}>{getMoodEmoji(entry.mood)}</Text>
+                    <Text style={styles.moodText}>Mood Level: {entry.mood}/10</Text>
+                  </View>
+                  <View style={styles.entryActions}>
+                    <TouchableOpacity
+                        style={[styles.entryActionButton, styles.editButton]}
+                        onPress={() => startEditing(entry)}
+                    >
+                      <Text style={styles.actionButtonText}>Edit</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.entryActionButton, styles.deleteButton]}
+                        onPress={() => deleteEntry(entry.id)}
+                    >
+                      <Text style={styles.actionButtonText}>Delete</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+            ))}
+          </ScrollView>
+        </View>
+    );
+  };
 
   return (
       <SafeAreaView style={styles.safeArea}>
@@ -27,34 +245,24 @@ const CheckInScreen = () => {
             style={styles.keyboardAvoid}
         >
           <View style={styles.container}>
-            <Text style={styles.title}>Mental Health Check-In</Text>
+            <Text style={styles.title}>Mood Check-In</Text>
 
             {!showCheckIn ? (
-                <View style={styles.emptyStateContainer}>
-                  <Text style={styles.emptyStateText}>
-                    Track your mood and mental well-being
-                  </Text>
-                  <TouchableOpacity
-                      style={styles.addButton}
-                      onPress={() => setShowCheckIn(true)}
-                  >
-                    <Text style={styles.buttonText}>Start Check-In</Text>
-                  </TouchableOpacity>
-                </View>
+                renderPreviousEntries()
             ) : (
                 <View style={styles.formOuterContainer}>
+                  <Text style={styles.dateText}>
+                    {editingEntry ? 'Edit Check-In' : 'New Check-In'} - {new Date().toLocaleDateString()}
+                  </Text>
                   <ScrollView
                       style={styles.formContainer}
                       contentContainerStyle={styles.formContentContainer}
                       showsVerticalScrollIndicator={false}
                   >
-                    <Text style={styles.questionText}>How are you feeling today?</Text>
-
-                    <View style={styles.sliderContainer}>
-                      <View style={styles.sliderLabelsContainer}>
-                        <Text style={styles.sliderLabel}>Not Great</Text>
-                        <Text style={styles.sliderLabel}>Great</Text>
-                      </View>
+                    <View style={styles.moodInputContainer}>
+                      <Text style={styles.moodEmoji}>{getMoodEmoji(moodValue)}</Text>
+                      <Text style={styles.moodPrompt}>How are you feeling?</Text>
+                      <Text style={styles.moodValue}>{moodValue}/10</Text>
                       <Slider
                           style={styles.slider}
                           minimumValue={1}
@@ -62,28 +270,20 @@ const CheckInScreen = () => {
                           step={1}
                           value={moodValue}
                           onValueChange={setMoodValue}
-                          minimumTrackTintColor="#8E24AA"
-                          maximumTrackTintColor="#E0E0E0"
-                          thumbTintColor="#6A1B9A"
+                          minimumTrackTintColor="#673AB7"
+                          maximumTrackTintColor="#D1C4E9"
                       />
-                      <View style={styles.valueContainer}>
-                        <Text style={styles.valueText}>{moodValue}</Text>
-                      </View>
                     </View>
-
                     <View style={styles.buttonContainer}>
                       <TouchableOpacity
                           style={[styles.actionButton, styles.saveButton]}
-                          onPress={() => {
-                            saveToFile(ScreenNames.CheckIn);
-                            setShowCheckIn(false);
-                          }}
+                          onPress={handleSave}
                       >
-                        <Text style={styles.buttonText}>Save</Text>
+                        <Text style={styles.buttonText}>{editingEntry ? 'Update' : 'Save'}</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                           style={[styles.actionButton, styles.cancelButton]}
-                          onPress={() => setShowCheckIn(false)}
+                          onPress={cancelEditing}
                       >
                         <Text style={styles.buttonText}>Cancel</Text>
                       </TouchableOpacity>
@@ -97,10 +297,37 @@ const CheckInScreen = () => {
   );
 };
 
+// Helper functions for file paths
+function getFilePath(screenType: ScreenNames): string {
+  switch (screenType) {
+    case ScreenNames.Activities:
+      return FileSystem.documentDirectory + "files/activities.json";
+    case ScreenNames.Journal:
+      return FileSystem.documentDirectory + "files/journal.json";
+    case ScreenNames.CheckIn:
+      return FileSystem.documentDirectory + "files/checkin.json";
+    default:
+      return FileSystem.documentDirectory + "files/files.json";
+  }
+}
+
+function getWebStorageKey(screenType: ScreenNames): string {
+  switch (screenType) {
+    case ScreenNames.Activities:
+      return "peace_of_mind_activities";
+    case ScreenNames.Journal:
+      return "peace_of_mind_journal";
+    case ScreenNames.CheckIn:
+      return "peace_of_mind_checkin";
+    default:
+      return "peace_of_mind_data";
+  }
+}
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F5E8F7',
+    backgroundColor: '#EDE7F6',
   },
   keyboardAvoid: {
     flex: 1,
@@ -116,7 +343,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#6A1B9A',
+    color: '#673AB7',
     marginBottom: 24,
     textAlign: 'center',
   },
@@ -135,64 +362,56 @@ const styles = StyleSheet.create({
   formOuterContainer: {
     flex: 1,
   },
+  dateText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#673AB7',
+    marginBottom: 15,
+  },
   formContainer: {
     backgroundColor: 'white',
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     elevation: 5,
   },
   formContentContainer: {
     padding: 20,
     paddingBottom: 30,
   },
-  questionText: {
+  moodInputContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  moodPrompt: {
     fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 20,
-    color: '#424242',
-    textAlign: 'center',
+    color: '#512DA8',
+    marginVertical: 12,
   },
-  sliderContainer: {
-    width: '100%',
-    marginVertical: 16,
+  moodValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#673AB7',
+    marginBottom: 10,
   },
-  sliderLabelsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
+  moodEmoji: {
+    fontSize: 64,
+    marginBottom: 10,
   },
   slider: {
     width: '100%',
     height: 40,
   },
-  sliderLabel: {
-    fontSize: 14,
-    color: '#757575',
-  },
-  valueContainer: {
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  valueText: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: '#6A1B9A',
-  },
   addButton: {
-    backgroundColor: '#8E24AA',
+    backgroundColor: '#673AB7',
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 30,
     elevation: 3,
+    alignItems: 'center',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
-    marginTop: 24,
+    marginTop: 20,
   },
   actionButton: {
     paddingVertical: 12,
@@ -203,7 +422,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   saveButton: {
-    backgroundColor: '#8E24AA',
+    backgroundColor: '#673AB7',
   },
   cancelButton: {
     backgroundColor: '#FF5252',
@@ -212,6 +431,57 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  entriesContainer: {
+    flex: 1,
+    width: '100%',
+  },
+  entriesList: {
+    marginTop: 20,
+  },
+  entryCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 3,
+  },
+  entryDate: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#673AB7',
+    marginBottom: 8,
+  },
+  moodContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  moodText: {
+    fontSize: 18,
+    marginLeft: 16,
+    color: '#424242',
+  },
+  entryActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 16,
+  },
+  entryActionButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    marginLeft: 8,
+  },
+  editButton: {
+    backgroundColor: '#7E57C2',
+  },
+  deleteButton: {
+    backgroundColor: '#EF5350',
+  },
+  actionButtonText: {
+    color: 'white',
+    fontWeight: '500',
+    fontSize: 14,
   }
 });
 
