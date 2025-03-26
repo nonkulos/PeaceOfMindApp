@@ -10,31 +10,31 @@ const Tab = createBottomTabNavigator();
 
 const AppNavigator = () => {
     return (
-            <Tab.Navigator
-                screenOptions={({ route }) => ({
-                    tabBarIcon: ({ focused, color, size }) => {
-                        let iconName;
+        <Tab.Navigator
+            screenOptions={({ route }) => ({
+                tabBarIcon: ({ focused, color, size }) => {
+                    let iconName: keyof typeof Ionicons.glyphMap | undefined;
 
-                        if (route.name === 'Journal') {
-                            iconName = focused ? 'book' : 'book-outline';
-                        } else if (route.name === 'Activities') {
-                            iconName = focused ? 'fitness' : 'fitness-outline';
-                        } else if (route.name === 'Check-In') {
-                            iconName = focused ? 'heart' : 'heart-outline';
-                        }
+                    if (route.name === 'Journal') {
+                        iconName = focused ? 'book' : 'book-outline';
+                    } else if (route.name === 'Activities') {
+                        iconName = focused ? 'fitness' : 'fitness-outline';
+                    } else if (route.name === 'Check-In') {
+                        iconName = focused ? 'heart' : 'heart-outline';
+                    }
 
-                        return <Ionicons name={iconName} size={size} color={color} />;
-                    },
-                    tabBarActiveTintColor: Platform.OS === 'ios' ? '#1976D2' : '#4CAF50',
-                    tabBarInactiveTintColor: 'gray',
-                    headerShown: true,
-                    
-                })}
-            >
-                <Tab.Screen name="Journal" component={JournalScreen} options={{title: 'Journal', headerTitle: 'Journal'}} />
-                <Tab.Screen name="Activities" component={ActivitiesScreen} />
-                <Tab.Screen name="Check-In" component={CheckInScreen} />
-            </Tab.Navigator>
+                    // @ts-ignore
+                    return <Ionicons name={iconName} size={size} color={color} />;
+                },
+                tabBarActiveTintColor: Platform.OS === 'ios' ? '#1976D2' : '#4CAF50',
+                tabBarInactiveTintColor: 'gray',
+                headerShown: true,
+            })}
+        >
+            <Tab.Screen name="Journal" component={JournalScreen} options={{title: 'Journal', headerTitle: 'Journal'}} />
+            <Tab.Screen name="Activities" component={ActivitiesScreen} />
+            <Tab.Screen name="Check-In" component={CheckInScreen} />
+        </Tab.Navigator>
     );
 };
 
