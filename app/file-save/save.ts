@@ -143,3 +143,5 @@ function getWebStorageKey(screenType: ScreenNames): string {
             return "peace_of_mind_data";
     }
 }
+
+export default () => null;

@@ -16,7 +16,7 @@ export default function TabLayout() {
     <Tab.Navigator
         screenOptions={({ route }) => ({
             tabBarIcon: ({ focused, color, size }) => {
-                let iconName;
+                let iconName: keyof typeof Ionicons.glyphMap;
 
                 if (route.name === 'Journal') {
                     iconName = focused ? 'book' : 'book-outline';
@@ -24,6 +24,8 @@ export default function TabLayout() {
                     iconName = focused ? 'fitness' : 'fitness-outline';
                 } else if (route.name === 'Check-In') {
                     iconName = focused ? 'heart' : 'heart-outline';
+                } else {
+                    iconName = 'help-circle-outline';
                 }
 
                 return <Ionicons name={iconName} size={size} color={color} />;
