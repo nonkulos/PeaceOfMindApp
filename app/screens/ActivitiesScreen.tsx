@@ -4,6 +4,7 @@ import {
   ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, Alert
 } from 'react-native';
 import {saveToFile, deleteFromFile } from "@/app/file-save/save";
+import * as FileSystem from 'expo-file-system';
 import {ScreenNames} from "@/constants/Enums";
 import {loadFile} from "@/app/file-save/load";
 
