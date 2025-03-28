@@ -84,8 +84,15 @@ export async function deleteFromFile(screenType: ScreenNames, id: number): Promi
         // Handle web platform with localStorage
         if (Platform.OS === 'web') {
             try {
-                const storageKey = getWebStorageKey(screenType);
-                localStorage.setItem(storageKey, JSON.stringify(updatedData));
+                const getLocalStorageKey = getWebStorageKey(screenType);
+
+                // Remove the entry from localStorage
+                const existingData = JSON.parse(localStorage.getItem(getLocalStorageKey) || '[]');
+                const updatedData = existingData.filter((entry: { id: number; }) => entry.id !== id);
+                console.log(`[DELETE] Updated data length: ${updatedData.length}`);
+
+                // Save the updated data back to localStorage
+                localStorage.setItem(getLocalStorageKey, JSON.stringify(updatedData));
                 return true;
             } catch (e) {
                 console.error("Web delete error:", e);

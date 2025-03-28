@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+.npm/
+.yarn/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output (excluding dist which we need)
+build/
+.expo/
+web-build/
+
+# Environment and configuration
+.env
+.env.*
+*.env.local
+*.env.development
+*.env.test
+*.env.production
+
+# IDE and OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+.jest/
+jest-*.json
+
+# Logs
+logs/
+*.log
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+
+# Temporary files
+.tmp/
+.temp/
+*.tmp
+
+# Documentation
+docs/
+README.md
+LICENSE
+*.md
+
+# Misc
+.github/
+__tests__/
+assets/raw/

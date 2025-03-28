@@ -112,26 +112,40 @@ const JournalScreen = () => {
   };
 
   const deleteEntry = async (id: number) => {
-    Alert.alert(
-        "Delete Journal Entry",  // Updated the title to match journal context
-        "Are you sure you want to delete this journal entry?",  // Updated the message
-        [
-          {
-            text: "Cancel",
-            style: "cancel"
-          },
-          {
-            text: "Delete",
-            style: "destructive",
-            onPress: async () => {
-              const success = await deleteFromFile(ScreenNames.Journal, id);
-              if (success) {
-                await loadEntries();
+    if (Platform.OS === 'web') {
+      // Web implementation
+      const confirmed = window.confirm("Are you sure you want to delete this activity?");
+
+
+      if (confirmed) {
+        const success = await deleteFromFile(ScreenNames.Journal, id);
+        if (success) {
+          await loadEntries();
+        }
+      }
+    } else {
+      // React Native implementation
+      Alert.alert(
+          "Delete Activity",
+          "Are you sure you want to delete this activity?",
+          [
+            {
+              text: "Cancel",
+              style: "cancel"
+            },
+            {
+              text: "Delete",
+              style: "destructive",
+              onPress: async () => {
+                const success = await deleteFromFile(ScreenNames.Activities, id);
+                if (success) {
+                  await loadEntries();
+                }
               }
             }
-          }
-        ]
-    );
+          ]
+      );
+    }
   };
 
   const formatDate = (dateString: string) => {
