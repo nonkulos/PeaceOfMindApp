@@ -1,50 +1,127 @@
-# Welcome to your Expo app 👋
+# Peace of Mind
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A cross-platform mental health tracking application built with React Native and Expo.
 
-## Get started
+## Overview
 
-1. Install dependencies
+Peace of Mind helps users track their mental wellbeing through three core features:
+- **Mood Check-Ins**: Log and visualize your daily mood ratings
+- **Journal Entries**: Record thoughts and reflections
+- **Activity Tracking**: Monitor beneficial activities and habits
 
-   ```bash
-   npm install
-   ```
+## Features
 
-2. Start the app
+- **Cross-platform compatibility**: Works on iOS, Android, and Web
+- **Offline functionality**: All data stored locally on the device
+- **Responsive design**: Optimized for all screen sizes
+- **User-friendly interface**: Intuitive and accessible UI
 
-   ```bash
-    npx expo start
-   ```
+## Technology Stack
 
-In the output, you'll find options to open the app in a
+- React Native
+- Expo
+- TypeScript
+- File-based data storage
+- Local Storage for web platform
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Getting Started
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Prerequisites
 
-## Get a fresh project
+- Node.js (v14+)
+- npm or yarn
+- Expo CLI (`npm install -g expo-cli`)
 
-When you're ready, run:
+### Installation
 
 ```bash
-npm run reset-project
+# Clone the repository
+git clone https://github.com/yourusername/peace-of-mind.git
+cd peace-of-mind
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Running on Different Platforms
 
-## Learn more
+```bash
+# Run on iOS
+npm run ios
 
-To learn more about developing your project with Expo, look at the following resources:
+# Run on Android
+npm run android
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+# Run on web
+npm run web
+```
 
-## Join the community
+## Building for Production
 
-Join our community of developers creating universal apps.
+### Web Static Build
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+# Create a production web build
+expo build:web
+```
+
+### Using Docker for Web Deployment
+
+```bash
+# Build the Docker image
+docker build -t peace-of-mind .
+
+# Run the container
+docker run -p 3049:3049 peace-of-mind
+```
+
+### Mobile Deployment
+
+For mobile distribution, build using EAS:
+
+```bash
+# Configure EAS
+eas build:configure
+
+# Build for iOS
+eas build --platform ios --profile production
+
+# Build for Android
+eas build --platform android --profile production
+```
+
+## Project Structure
+
+```
+peace-of-mind/
+├── app/
+│   ├── screens/              # Application screens
+│   │   ├── CheckInScreen.tsx # Mood tracking feature
+│   │   ├── JournalScreen.tsx # Journal entries feature
+│   │   └── ActivitiesScreen.tsx # Activities tracking
+│   ├── components/           # Reusable components
+│   └── utils/                # Utility functions
+├── assets/                   # Images, fonts, etc.
+├── .dockerignore             # Docker ignore file
+└── Dockerfile                # Docker configuration
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Expo team for the cross-platform framework
+- React Native community for their excellent documentation
